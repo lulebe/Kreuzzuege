@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="de.lulebe.kreuzzuege.GameActivity"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <de.lulebe.kreuzzuege.ui.MapView
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+    </de.lulebe.kreuzzuege.ui.MapView>
+
+    <LinearLayout
+        android:id="@+id/lSidePanel"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="2"
+        android:padding="8dp"
+        android:background="#decfac"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_selectedField"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/sidepanel_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                    android:text="Crusaders Money:"/>
+                <TextView
+                    android:id="@+id/tv_money_cr"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                    android:text="Saracen Money:"/>
+                <TextView
+                    android:id="@+id/tv_money_sa"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
+
+                <TextView
+                    android:id="@+id/tv_buildingname"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.AppCompat.SearchResult.Title"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/tv_info_recruitableunits"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:text="recruitable Units:"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/l_recruitable_units_empty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                    android:text="No units can be recruited here."
+                    android:visibility="gone"/>
+
+                <LinearLayout
+                    android:id="@+id/l_recruitable_units"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"/>
+
+                <Button
+                    android:id="@+id/btn_endturn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="end Turn"/>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </LinearLayout>
+</LinearLayout>
+

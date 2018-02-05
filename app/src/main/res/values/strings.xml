@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Kreuzzuege</string>
+    <string name="building_village">Village</string>
+    <string name="building_city">Town</string>
+    <string name="building_hq">Headquarter</string>
+    <string name="building_barracks">Barracks</string>
+    <string name="building_stable">Stables</string>
+    <string name="building_factory">Factory</string>
+    <string name="building_harbour">Harbour</string>
+    <string name="building_airport">Airport</string>
+    <string name="unit_guard">Guard</string>
+    <string name="unit_spear">Spearman</string>
+    <string name="unit_sword">Swordsman</string>
+    <string name="unit_archer">Archer</string>
+    <string name="unit_lightkav">Light Cavalry</string>
+    <string name="unit_archerkav">Archer Cavalry</string>
+    <string name="unit_heavykav">Heavy Cavalry</string>
+    <string name="unit_catapult">Catapult</string>
+    <string name="unit_ballista">Ballista</string>
+    <string name="unit_trebuchet">Trebuchet</string>
+    <string name="unit_tower">Tower</string>
+    <string name="unit_ship">Ship</string>
+    <string name="unit_air">Griffon</string>
+</resources>

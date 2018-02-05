@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "928894006312",
+    "project_id": "kreuzzuege-99234535"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:928894006312:android:01329523fbca143f",
+        "android_client_info": {
+          "package_name": "de.lulebe.kreuzzuege"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "928894006312-156sag80grfjssddvjblvvkljkjh6h2a.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "928894006312-raafd922qla3i295bb8dkc8mgd7v4lfn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "de.lulebe.kreuzzuege",
+            "certificate_hash": "98a775b0fd28ac7fa741da89aee674d67f31eb3c"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDk3XTRHVoZWEVvk1sMrsfh_rM9Ng-sQwo"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
