@@ -36,8 +36,10 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging:11.8.0'
     implementation 'org.jetbrains.anko:anko-commons:0.10.4'
     implementation 'com.squareup.okhttp3:okhttp:3.9.1'
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.9.3'
+    implementation 'com.beust:klaxon:2.1.6'
 }
+
+
 
 
 

@@ -1,5 +1,9 @@
 package de.lulebe.kreuzzuege.data
 
+import android.content.Context
+import com.beust.klaxon.JsonArray
+import com.beust.klaxon.JsonObject
+
 
 data class Game(
         val type: Int,
@@ -8,13 +12,28 @@ data class Game(
         val playerSaracen: Player,
         var turn: Int,
         var finished: Boolean,
+        val turnActions: MutableList<TurnAction>,
         @Transient val myFaction: Int,
         @Transient val enemyName: String
 ) {
 
     companion object {
-        fun fromJSON (json: String) : Game {
-            TODO("implement")
+        fun fromJSON (json: JsonObject, context: Context, userId: Int) : Game {
+            val gameJson = json.obj("data")!!
+            val map = Maps.getFullMap(gameJson.int("map")!!, context)
+            val playerCrusaders = Player.fromJSON(gameJson.obj("playerCrusaders")!!)
+            val playerSaracen = Player.fromJSON(gameJson.obj("playerSaracen")!!)
+            return Game(
+                    gameJson.int("type")!!,
+                    map,
+                    playerCrusaders,
+                    playerSaracen,
+                    gameJson.int("turn")!!,
+                    gameJson.boolean("finished")!!,
+                    gameJson.array<JsonObject>("turnActions")!!.map { TurnAction.fromJSON(it) }.toMutableList(),
+                    0,
+                    json.array<JsonObject>("players")!!.first { it.int("id")!! != userId }.string("name")!!
+            )
         }
     }
 
@@ -77,8 +96,16 @@ data class Game(
         }
     }
 
-    fun toJSON (): String {
-        return "TODO!!!"
+    fun toJSON (): JsonObject {
+        val map = mutableMapOf<String, Any>()
+        map["type"] = type
+        map["map"] = this.map.id
+        map["playerCrusaders"] = playerCrusaders.toJSON()
+        map["playerSaracen"] = playerSaracen.toJSON()
+        map["turn"] = turn
+        map["finished"] = finished
+        map["turnActions"] = JsonArray(turnActions.map { it.toJSON() })
+        return JsonObject(map)
     }
 
     fun endTurn () {
@@ -168,12 +195,12 @@ data class Game(
     }
 
     fun changeHP (unit: Unit, change: Int, notify: Boolean = true) {
-        unit.hp += change
-        if (unit.hp <= 0) {
+        unit.hitPoints += change
+        if (unit.hitPoints <= 0) {
             val owner = if (unit.faction == Faction.CRUSADERS) playerCrusaders else playerSaracen
             owner.units.remove(unit)
-        } else if (unit.hp > Unit.Data[unit.type]!!.hitPoints)
-            unit.hp = Unit.Data[unit.type]!!.hitPoints
+        } else if (unit.hitPoints > Unit.Data[unit.type]!!.hitPoints)
+            unit.hitPoints = Unit.Data[unit.type]!!.hitPoints
         if (notify)
             changedGame()
     }

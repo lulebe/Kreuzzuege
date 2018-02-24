@@ -268,7 +268,7 @@ class MapView : View {
                 mUnitHealthBGPaint
         )
         canvas.drawText(
-                unit.hp.toString().padStart(2, '0'),
+                unit.hitPoints.toString().padStart(2, '0'),
                 healthBGRight - mUnitHealthBGWidth + mUnitHealthPadding,
                 healthBGBottom - mUnitHealthPadding,
                 mUnitHealthPaint

@@ -1,5 +1,6 @@
 package de.lulebe.kreuzzuege.data
 
+import com.beust.klaxon.JsonObject
 import de.lulebe.kreuzzuege.R
 
 
@@ -7,12 +8,24 @@ data class Unit(
         val type: Int,
         val faction: Int,
         var field: Int,
-        var hp: Int,
+        var hitPoints: Int,
         var food: Int,
         var ammo: Int,
         @Transient var didMove: Boolean = false,
         @Transient var didFight: Boolean = false
 ) {
+
+    fun toJSON() : JsonObject {
+        val map = mutableMapOf<String, Int>()
+        map["type"] = type
+        map["faction"] = faction
+        map["field"] = field
+        map["hitPoints"] = hitPoints
+        map["food"] = food
+        map["ammo"] = ammo
+        return JsonObject(map)
+    }
+
     class UnitData (val price: Int, val hitPoints: Int, val ammo: Int, val food: Int, val initiative: Int, val movementPoints: Int, val movementCosts: Array<Int>, val name: Int)
     class Type {
         companion object {
@@ -177,6 +190,17 @@ data class Unit(
 
         fun create (type: Int, faction: Int, field: Int) : Unit {
             return Unit(type, faction, field, Data[type]!!.hitPoints, Data[type]!!.food, Data[type]!!.ammo)
+        }
+
+        fun fromJSON (json: JsonObject) : Unit {
+            return Unit(
+                    json.int("type")!!,
+                    json.int("faction")!!,
+                    json.int("field")!!,
+                    json.int("hitPoints")!!,
+                    json.int("food")!!,
+                    json.int("ammo")!!
+            )
         }
     }
 }

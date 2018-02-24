@@ -5,7 +5,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import de.lulebe.kreuzzuege.R
 import de.lulebe.kreuzzuege.data.Field
 import de.lulebe.kreuzzuege.data.Game
@@ -13,7 +12,7 @@ import de.lulebe.kreuzzuege.data.Player
 import de.lulebe.kreuzzuege.data.Unit
 
 
-class SidePanel (private val layout: ViewGroup) {
+class SidePanel (private val layout: ViewGroup, private val onTurnEndListener: () -> kotlin.Unit) {
 
     private var _game: Game? = null
     var game: Game?
@@ -38,6 +37,7 @@ class SidePanel (private val layout: ViewGroup) {
     init {
         layout.findViewById<Button>(R.id.btn_endturn).setOnClickListener {
                     game?.endTurn()
+                    endedTurn()
                 }
     }
 
@@ -105,6 +105,10 @@ class SidePanel (private val layout: ViewGroup) {
                 }
             }
         }
+    }
+
+    private fun endedTurn() {
+        onTurnEndListener()
     }
 
 }

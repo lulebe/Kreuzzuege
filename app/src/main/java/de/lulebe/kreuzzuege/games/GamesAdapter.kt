@@ -10,8 +10,9 @@ import de.lulebe.kreuzzuege.R
 import de.lulebe.kreuzzuege.data.Game
 
 
-class GamesAdapter : RecyclerView.Adapter<GamesAdapter.ViewHolder>() {
+class GamesAdapter() : RecyclerView.Adapter<GamesAdapter.ViewHolder>() {
 
+    var userId = 0
     var games = emptyList<JsonObject>()
 
     var clickListener: ((JsonObject) -> Unit)? = null
@@ -23,7 +24,8 @@ class GamesAdapter : RecyclerView.Adapter<GamesAdapter.ViewHolder>() {
     override fun getItemCount() =  games.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.tvEnemy.text = games[position]["players"].toString()
+        val enemy = games[position].array<JsonObject>("players")!!.first { it.int("id")!! != userId }
+        holder.tvEnemy.text = enemy.string("name")!!
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
