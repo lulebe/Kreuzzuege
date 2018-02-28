@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import com.beust.klaxon.JsonObject
@@ -49,7 +48,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
-            R.id.menuitem_settings -> { startActivity(Intent(this, SettingsActivity::class.java)) }
+            R.id.menuitem_signout -> { signout() }
         }
         return super.onOptionsItemSelected(item)
     }
@@ -63,6 +62,7 @@ class MainActivity : AppCompatActivity() {
                     uiThread {
                         mGamesAdapter.userId = sp.getInt("userId", 0)
                         showGames(games.toList())
+                        tv_username.text = sp.getString("username", "")
                     }
                 } catch (e: ApiClient.AuthException) {
                     uiThread { showLoginScreen() }
@@ -91,6 +91,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun createNewGame() {
         startActivity(Intent(this, CreateGameActivity::class.java))
+    }
+
+    private fun signout() {
+        (application as Kreuzzuege).apiClient.signOut()
+        mGamesAdapter.userId = 0
+        mGamesAdapter.games = emptyList()
+        mGamesAdapter.notifyDataSetChanged()
+        tv_username.text = ""
+        showLoginScreen()
     }
 
 }

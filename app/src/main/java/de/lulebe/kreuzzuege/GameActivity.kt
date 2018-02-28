@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Window
 import android.view.WindowManager
 import android.widget.Toast
@@ -23,7 +24,7 @@ class GameActivity : AppCompatActivity() {
     private val onTurnEndListener = {
         game?.let { g ->
             gameJSON?.let { j ->
-                if (g.finished) {
+                if (g.winner != null) {
                     // TODO stuff when game's finished
                 }
                 doAsync {
@@ -31,6 +32,7 @@ class GameActivity : AppCompatActivity() {
                     (application as Kreuzzuege).apiClient.uploadGame(j)
                     uiThread {
                         Toast.makeText(this@GameActivity, "Turn was uploaded", Toast.LENGTH_SHORT).show()
+                        finish()
                     }
                 }
             }

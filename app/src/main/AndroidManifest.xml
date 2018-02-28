@@ -30,9 +30,6 @@
         <activity
             android:name=".GameActivity"
             android:screenOrientation="sensorLandscape" />
-        <activity android:name=".SettingsActivity"
-            android:screenOrientation="sensorPortrait"
-            android:parentActivityName=".MainActivity"/>
     </application>
 
 </manifest>

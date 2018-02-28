@@ -5,6 +5,7 @@ import de.lulebe.kreuzzuege.R
 
 
 data class Unit(
+        val id: Int,
         val type: Int,
         val faction: Int,
         var field: Int,
@@ -17,6 +18,7 @@ data class Unit(
 
     fun toJSON() : JsonObject {
         val map = mutableMapOf<String, Int>()
+        map["id"] = id
         map["type"] = type
         map["faction"] = faction
         map["field"] = field
@@ -26,7 +28,20 @@ data class Unit(
         return JsonObject(map)
     }
 
-    class UnitData (val price: Int, val hitPoints: Int, val ammo: Int, val food: Int, val initiative: Int, val movementPoints: Int, val movementCosts: Array<Int>, val name: Int)
+    class UnitData (
+            val price: Int,
+            val hitPoints: Int,
+            val ammo: Int,
+            val food: Int,
+            val initiative: Int,
+            val minAttackDistance: Int,
+            val maxAttackDistance: Int,
+            val attackNumberOfFights: Array<Int>,
+            val defenseNumberOfFights: Array<Int>,
+            val moveAndFight: Boolean,
+            val movementPoints: Int,
+            val movementCosts: Array<Int>,
+            val name: Int)
     class Type {
         companion object {
             const val GUARD = 1
@@ -52,6 +67,11 @@ data class Unit(
                         ammo = -1,
                         food = -1,
                         initiative = 3,
+                        minAttackDistance = 1,
+                        maxAttackDistance = 1,
+                        attackNumberOfFights = arrayOf(0, 3, 3, 3, 3, 2, 2, 2, 1, 1, 1, 0, 0),
+                        defenseNumberOfFights = arrayOf(0, 3, 3, 3, 3, 2, 2, 2, 1, 1, 1, 1, 1),
+                        moveAndFight = true,
                         movementPoints = 4,
                         movementCosts = arrayOf(0,-1, 2, -1, 4, -1, 1, -1, -1),
                         name = R.string.unit_guard
@@ -62,6 +82,11 @@ data class Unit(
                         ammo = -1,
                         food = 10,
                         initiative = 3,
+                        minAttackDistance = 1,
+                        maxAttackDistance = 1,
+                        attackNumberOfFights = arrayOf(0, 3, 3, 3, 3, 5, 5, 5, 1, 1, 1, 0, 0),
+                        defenseNumberOfFights = arrayOf(0, 3, 3, 3, 3, 5, 5, 5, 1, 1, 1, 1, 2),
+                        moveAndFight = true,
                         movementPoints = 5,
                         movementCosts = arrayOf(0,-1, 2, 2, 3, 3, 1, -1, 3),
                         name = R.string.unit_spear
@@ -72,6 +97,11 @@ data class Unit(
                         ammo = -1,
                         food = 10,
                         initiative = 3,
+                        minAttackDistance = 1,
+                        maxAttackDistance = 1,
+                        attackNumberOfFights = arrayOf(0, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2, 0, 0),
+                        defenseNumberOfFights = arrayOf(0, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2, 1, 1),
+                        moveAndFight = true,
                         movementPoints = 5,
                         movementCosts = arrayOf(0,-1, 2, 2, 3, 3, 1, -1, 3),
                         name = R.string.unit_sword
@@ -82,6 +112,11 @@ data class Unit(
                         ammo = 10,
                         food = 10,
                         initiative = 1,
+                        minAttackDistance = 1,
+                        maxAttackDistance = 2,
+                        attackNumberOfFights = arrayOf(0, 3, 3, 3, 3, 2, 2, 2, 1, 1, 1, 2, 3),
+                        defenseNumberOfFights = arrayOf(0, 3, 3, 3, 3, 2, 2, 2, 1, 1, 1, 2, 3),
+                        moveAndFight = true,
                         movementPoints = 6,
                         movementCosts = arrayOf(0, -1, 2, 2, 3, 3, 1, -1, 3),
                         name = R.string.unit_archer
@@ -92,6 +127,11 @@ data class Unit(
                         ammo = -1,
                         food = 8,
                         initiative = 3,
+                        minAttackDistance = 1,
+                        maxAttackDistance = 1,
+                        attackNumberOfFights = arrayOf(0, 4, 4, 4, 4, 3, 3, 3, 2, 2, 2, 0, 0),
+                        defenseNumberOfFights = arrayOf(0, 4, 4, 4, 4, 3, 3, 3, 2, 2, 2, 1, 2),
+                        moveAndFight = true,
                         movementPoints = 8,
                         movementCosts = arrayOf(0, -1, 2, 2, 3, 3, 1, -1, 3),
                         name = R.string.unit_lightkav
@@ -102,6 +142,11 @@ data class Unit(
                         ammo = 8,
                         food = 8,
                         initiative = 1,
+                        minAttackDistance = 1,
+                        maxAttackDistance = 2,
+                        attackNumberOfFights = arrayOf(0, 3, 3, 3, 3, 2, 2, 2, 1, 1, 1, 2, 4),
+                        defenseNumberOfFights = arrayOf(0, 3, 3, 3, 3, 2, 2, 2, 1, 1, 1, 2, 4),
+                        moveAndFight = true,
                         movementPoints = 8,
                         movementCosts = arrayOf(0, -1, 2, 2, 3, 3, 1, -1, 3),
                         name = R.string.unit_archerkav
@@ -112,6 +157,11 @@ data class Unit(
                         ammo = -1,
                         food = 6,
                         initiative = 4,
+                        minAttackDistance = 1,
+                        maxAttackDistance = 1,
+                        attackNumberOfFights = arrayOf(0, 5, 5, 5, 5, 4, 4, 4, 3, 3, 3, 0, 0),
+                        defenseNumberOfFights = arrayOf(0, 5, 5, 5, 5, 4, 4, 4, 3, 3, 3, 2, 3),
+                        moveAndFight = true,
                         movementPoints = 7,
                         movementCosts = arrayOf(0, -1, 2, 2, 3, 3, 1, -1, 3),
                         name = R.string.unit_heavykav
@@ -122,6 +172,11 @@ data class Unit(
                         ammo = 6,
                         food = 10,
                         initiative = 3,
+                        minAttackDistance = 2,
+                        maxAttackDistance = 3,
+                        attackNumberOfFights = arrayOf(0, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 2, 0),
+                        defenseNumberOfFights = arrayOf(0, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 2, 1),
+                        moveAndFight = false,
                         movementPoints = 4,
                         movementCosts = arrayOf(0, -1, 2, -1, 5, -1, 1, -1, -1),
                         name = R.string.unit_catapult
@@ -132,6 +187,11 @@ data class Unit(
                         ammo = 5,
                         food = 10,
                         initiative = 3,
+                        minAttackDistance = 2,
+                        maxAttackDistance = 4,
+                        attackNumberOfFights = arrayOf(0, 3, 3, 3, 3, 2, 2, 2, 1, 1, 1, 1, 1),
+                        defenseNumberOfFights = arrayOf(0, 3, 3, 3, 3, 2, 2, 2, 1, 1, 1, 1, 1),
+                        moveAndFight = false,
                         movementPoints = 4,
                         movementCosts = arrayOf(0, -1, 2, -1, 4, -1, 1, -1, -1),
                         name = R.string.unit_ballista
@@ -142,6 +202,11 @@ data class Unit(
                         ammo = 5,
                         food = 10,
                         initiative = 4,
+                        minAttackDistance = 2,
+                        maxAttackDistance = 4,
+                        attackNumberOfFights = arrayOf(0, 2, 2, 2, 2, 1, 1, 1, 4, 4, 4, 1, 0),
+                        defenseNumberOfFights = arrayOf(0, 2, 2, 2, 2, 1, 1, 1, 4, 4, 4, 1, 0),
+                        moveAndFight = false,
                         movementPoints = 3,
                         movementCosts = arrayOf(0, -1, 2, -1, -1, -1, 1, -1, -1),
                         name = R.string.unit_trebuchet
@@ -152,6 +217,11 @@ data class Unit(
                         ammo = 10,
                         food = 10,
                         initiative = 4,
+                        minAttackDistance = 1,
+                        maxAttackDistance = 2,
+                        attackNumberOfFights = arrayOf(0, 3, 3, 3, 3, 2, 2, 2, 1, 1, 1, 1, 3),
+                        defenseNumberOfFights = arrayOf(0, 4, 4, 4, 4, 3, 3, 3, 1, 1, 1, 1, 3),
+                        moveAndFight = false,
                         movementPoints = 3,
                         movementCosts = arrayOf(0, -1, 2, -1, -1, -1, 1, -1, -1),
                         name = R.string.unit_tower
@@ -162,6 +232,11 @@ data class Unit(
                         ammo = -1,
                         food = 10,
                         initiative = 3,
+                        minAttackDistance = 1,
+                        maxAttackDistance = 1,
+                        attackNumberOfFights = arrayOf(0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0),
+                        defenseNumberOfFights = arrayOf(0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1),
+                        moveAndFight = true,
                         movementPoints = 8,
                         movementCosts = arrayOf(0, 1, -1, -1, -1, -1, 1, -1, -1),
                         name = R.string.unit_ship
@@ -172,6 +247,11 @@ data class Unit(
                         ammo = -1,
                         food = 5,
                         initiative = 2,
+                        minAttackDistance = 1,
+                        maxAttackDistance = 1,
+                        attackNumberOfFights = arrayOf(0, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2, 2, 3),
+                        defenseNumberOfFights = arrayOf(0, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2, 2, 3),
+                        moveAndFight = true,
                         movementPoints = 10,
                         movementCosts = arrayOf(0, 1, 1, 1, 1, 1, 1, 1, 1),
                         name = R.string.unit_air
@@ -188,12 +268,13 @@ data class Unit(
             const val SWAMP
          */
 
-        fun create (type: Int, faction: Int, field: Int) : Unit {
-            return Unit(type, faction, field, Data[type]!!.hitPoints, Data[type]!!.food, Data[type]!!.ammo)
+        fun create (type: Int, faction: Int, field: Int, id: Int) : Unit {
+            return Unit(id, type, faction, field, Data[type]!!.hitPoints, Data[type]!!.food, Data[type]!!.ammo)
         }
 
         fun fromJSON (json: JsonObject) : Unit {
             return Unit(
+                    json.int("id")!!,
                     json.int("type")!!,
                     json.int("faction")!!,
                     json.int("field")!!,

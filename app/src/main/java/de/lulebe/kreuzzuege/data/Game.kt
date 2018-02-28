@@ -1,8 +1,10 @@
 package de.lulebe.kreuzzuege.data
 
 import android.content.Context
+import android.graphics.Point
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
+import java.util.*
 
 
 data class Game(
@@ -10,10 +12,13 @@ data class Game(
         val map: Map,
         val playerCrusaders: Player,
         val playerSaracen: Player,
+        var lastUnitId: Int,
         var turn: Int,
-        var finished: Boolean,
+        var winner: Int?,
         val turnActions: MutableList<TurnAction>,
         @Transient val myFaction: Int,
+        @Transient val myId: Int,
+        @Transient val enemyId: Int,
         @Transient val enemyName: String
 ) {
 
@@ -28,10 +33,13 @@ data class Game(
                     map,
                     playerCrusaders,
                     playerSaracen,
+                    gameJson.int("lastUnitId")!!,
                     gameJson.int("turn")!!,
-                    gameJson.boolean("finished")!!,
+                    gameJson.int("winner"),
                     gameJson.array<JsonObject>("turnActions")!!.map { TurnAction.fromJSON(it) }.toMutableList(),
-                    0,
+                    json.array<JsonObject>("players")!!.first { it.int("id")!! == userId }.int("order")!! + 1,
+                    userId,
+                    json.array<JsonObject>("players")!!.first { it.int("id")!! != userId }.int("id")!!,
                     json.array<JsonObject>("players")!!.first { it.int("id")!! != userId }.string("name")!!
             )
         }
@@ -45,6 +53,30 @@ data class Game(
         }
     }
 
+    @Transient val unitsById = mutableMapOf<Int, Unit>()
+
+    @Transient private var _selectedField: Int? = null
+    var selectedField: Int?
+        get() = _selectedField
+        set(value) {
+            _selectedField = value
+            if (selectedUnitFightOptions.contains(value))
+                attackField(selectedUnit!!, value!!)
+            if (selectedUnitMovementOptions.contains(value))
+                moveUnit(selectedUnit!!, value!!)
+            selectedUnit = if (value != null)
+                getUnitOnField(value)
+            else
+                null
+            selectedUnitMovementOptions = if (selectedUnit != null) getReachableFields(selectedUnit!!) else emptyList()
+            selectedUnitFightOptions = if (selectedUnit != null) getAttackableUnitsFields(selectedUnit!!) else emptyList()
+            changedGame()
+        }
+    @Transient var selectedUnit: Unit? = null
+    @Transient var selectedUnitMovementOptions: List<Int> = emptyList()
+    @Transient var selectedUnitFightOptions: List<Int> = emptyList()
+    @Transient private val mListeners = mutableListOf<() -> kotlin.Unit>()
+
     init {
         if (turn == 1) {
             map.fields.forEachIndexed { index, field ->
@@ -57,25 +89,13 @@ data class Game(
                 }
             }
         }
-    }
-
-    @Transient private var _selectedField: Int? = null
-    var selectedField: Int?
-        get() = _selectedField
-        set(value) {
-            _selectedField = value
-            if (selectedUnitMovementOptions.contains(value))
-                moveUnit(selectedUnit!!, value!!)
-            selectedUnit = if (value != null)
-                getUnitOnField(value)
-            else
-                null
-            selectedUnitMovementOptions = if (selectedUnit != null) getReachableFields(selectedUnit!!) else emptyList()
-            changedGame()
+        playerCrusaders.units.forEach {
+            unitsById[it.id] = it
         }
-    @Transient var selectedUnit: Unit? = null
-    @Transient var selectedUnitMovementOptions: List<Int> = emptyList()
-    @Transient private val mListeners = mutableListOf<() -> kotlin.Unit>()
+        playerSaracen.units.forEach {
+            unitsById[it.id] = it
+        }
+    }
 
     fun addListener (listener: () -> kotlin.Unit) {
         if (!mListeners.contains(listener))
@@ -102,8 +122,9 @@ data class Game(
         map["map"] = this.map.id
         map["playerCrusaders"] = playerCrusaders.toJSON()
         map["playerSaracen"] = playerSaracen.toJSON()
+        map["lastUnitId"] = lastUnitId
         map["turn"] = turn
-        map["finished"] = finished
+        winner?.let { map["winner"] = it }
         map["turnActions"] = JsonArray(turnActions.map { it.toJSON() })
         return JsonObject(map)
     }
@@ -122,8 +143,27 @@ data class Game(
                         enemy.buildings.remove(unit.field)
                         if (building == Field.Building.HQ)
                             endGame()
-                    } else
+                        turnActions.add(TurnAction(
+                                TurnAction.TYPE_NEUTRALIZE,
+                                null,
+                                null,
+                                unit.field,
+                                null,
+                                null,
+                                null
+                        ))
+                    } else {
                         player.buildings.add(unit.field)
+                        turnActions.add(TurnAction(
+                                TurnAction.TYPE_CONQUER,
+                                null,
+                                null,
+                                unit.field,
+                                null,
+                                null,
+                                null
+                        ))
+                    }
                 } else {
                     changeHP(unit, 1, false)
                     if (hasSupportingBuildingNearby(unit)) {
@@ -142,7 +182,7 @@ data class Game(
     }
 
     fun endGame () {
-        // TODO
+        winner = myId
     }
 
     fun getUnitOnField (fieldPos: Int): Unit? {
@@ -178,20 +218,183 @@ data class Game(
         Unit.Data[type]?.let { unitData ->
             if (faction == Faction.CRUSADERS) {
                 playerCrusaders.money -= unitData.price
-                val unit = Unit.create(type, faction, fieldPos)
+                lastUnitId++
+                val unit = Unit.create(type, faction, fieldPos, lastUnitId)
                 unit.didFight = true
                 unit.didMove = true
                 playerCrusaders.units.add(unit)
+                turnActions.add(TurnAction(
+                        TurnAction.TYPE_CREATE,
+                        lastUnitId,
+                        null,
+                        fieldPos,
+                        null,
+                        null,
+                        null
+                ))
+            }
+            if (faction == Faction.SARACEN) {
+                playerSaracen.money -= unitData.price
+                lastUnitId++
+                val unit = Unit.create(type, faction, fieldPos, lastUnitId)
+                unit.didFight = true
+                unit.didMove = true
+                playerSaracen.units.add(unit)
+                turnActions.add(TurnAction(
+                        TurnAction.TYPE_CREATE,
+                        lastUnitId,
+                        null,
+                        fieldPos,
+                        null,
+                        null,
+                        null
+                ))
             }
         }
         changedGame()
     }
 
     fun moveUnit (unit: Unit, field: Int) {
+        turnActions.add(TurnAction(
+                TurnAction.TYPE_MOVE,
+                unit.id,
+                null,
+                field,
+                unit.field,
+                null,
+                null
+                ))
         unit.field = field
-        unit.food--
+        if (unit.food > 0)
+            unit.food--
         unit.didMove = true
+        if (!Unit.Data[unit.type]!!.moveAndFight)
+            unit.didFight = true
         changedGame()
+    }
+
+    fun attackField (unit: Unit, field: Int) {
+        getUnitOnField(field)?.let { fight(unit, it) }
+    }
+
+    fun fight (attacker: Unit, defender: Unit) {
+        var defenderDamage = 0
+        var attackerDamage = 0
+        var attackerInitiative = Unit.Data[attacker.type]!!.initiative
+        var defenderInitiative = Unit.Data[defender.type]!!.initiative
+        if(getDistance(attacker.field, defender.field) > 1) { //Distance attack, attacker will not get hurt
+            defenderDamage = this.computeDamage(attacker,defender)
+            if (attacker.ammo > 0)
+                attacker.ammo--
+            changeHP(defender, -defenderDamage)
+        } else { // close combat, both may get hurt
+            if(Field.Terrain.HBonuses[map.fields[defender.field].terrain]!! > 0)
+                defenderInitiative--
+            attackerInitiative--
+            //depending on initiative, one starts the fight first or both at the same time
+            //lower initiative starts the fight (what?!)
+            if(attackerInitiative == defenderInitiative) {
+                defenderDamage = this.computeDamage(attacker,defender)
+                attackerDamage = this.computeDamage(defender,attacker)
+                if (attacker.ammo > 0)
+                    attacker.ammo--
+                if (defender.ammo > 0)
+                    defender.ammo--
+                changeHP(defender, -defenderDamage)
+                changeHP(attacker, -attackerDamage)
+            } else if(attackerInitiative < defenderInitiative) {
+                defenderDamage = this.computeDamage(attacker,defender)
+                if (attacker.ammo > 0)
+                    attacker.ammo--
+                changeHP(defender, -defenderDamage)
+                if(defender.hitPoints > 0) {
+                    attackerDamage = this.computeDamage(defender,attacker)
+                    if (defender.ammo > 0)
+                        defender.ammo--
+                    changeHP(attacker, -attackerDamage)
+                }
+            } else if(attackerInitiative > defenderInitiative) {
+                attackerDamage = this.computeDamage(defender,attacker)
+                if (defender.ammo > 0)
+                    defender.ammo--
+                changeHP(attacker, -attackerDamage)
+                if(attacker.hitPoints > 0) {
+                    defenderDamage = this.computeDamage(attacker,defender)
+                    if (attacker.ammo > 0)
+                        attacker.ammo--
+                    changeHP(defender, -defenderDamage)
+                }
+            }
+        }
+        attacker.didFight = true
+        attacker.didMove = true
+        turnActions.add(TurnAction(
+                TurnAction.TYPE_FIGHT,
+                attacker.id,
+                defender.id,
+                null,
+                null,
+                attackerDamage,
+                defenderDamage
+        ))
+    }
+
+    fun computeDamage (attacker: Unit, defender: Unit) : Int {
+        var damage = 0
+        val distance = getDistance(attacker.field, defender.field)
+        val rand = Random()
+        for (i in 0..5) {
+            var attackerNumberOfFights = Unit.Data[attacker.type]!!.attackNumberOfFights[defender.type]
+            var defenderNumberOfFights = Unit.Data[defender.type]!!.defenseNumberOfFights[attacker.type]
+            if(distance < Unit.Data[attacker.type]!!.minAttackDistance) {
+                attackerNumberOfFights = 0
+            }
+            if(distance < Unit.Data[defender.type]!!.minAttackDistance) {
+                defenderNumberOfFights = 0
+            }
+            val defenderCity = map.fields[defender.field].building
+            if(defenderCity != null) {
+                defenderNumberOfFights += Field.Building.Data[defenderCity]!!.battleBonus
+                defenderNumberOfFights += Field.Terrain.HBonuses[map.fields[defender.field].terrain]!!
+            }
+            val attackerCity = map.fields[attacker.field].building
+            if(attackerCity != null) {
+                attackerNumberOfFights += Math.ceil(Field.Building.Data[attackerCity]!!.battleBonus.toDouble() / 2.0).toInt()
+                attackerNumberOfFights += Math.ceil(Field.Terrain.HBonuses[map.fields[attacker.field].terrain]!!.toDouble() / 2.0).toInt()
+            }
+            val attackerHitpoints = attacker.hitPoints;
+            var diceResult = 0
+            var damageAdd = 0
+            for (j in 0..(attackerHitpoints-1)) {
+                var highestAttackerDiceResult = 0
+                var highestDefenderDiceResult = 0
+                for (k in 0..(attackerNumberOfFights-1)) {
+
+                    diceResult = rand.nextInt(6) + 1
+                    if(diceResult > highestAttackerDiceResult) {
+                        highestAttackerDiceResult = diceResult
+                    }
+                }
+                for (l in 0..(defenderNumberOfFights-1)) {
+                    diceResult = rand.nextInt(6) + 1
+                    if(diceResult > highestDefenderDiceResult) {
+                        highestDefenderDiceResult = diceResult
+                    }
+                }
+                if(highestDefenderDiceResult < highestAttackerDiceResult) {
+                    damageAdd += 1
+                }
+            }
+            damage += damageAdd
+        }
+        damage /= 6
+        if(damage > defender.hitPoints) {
+            damage = defender.hitPoints
+        }
+        if(damage > 8) {
+            damage = 8
+        }
+        return damage
     }
 
     fun changeHP (unit: Unit, change: Int, notify: Boolean = true) {
@@ -205,6 +408,16 @@ data class Game(
             changedGame()
     }
 
+    fun getDistance (fieldA: Int, fieldB: Int) : Int {
+        val ax = fieldA % map.sizeX
+        val ay = fieldA / map.sizeX
+        val bx = fieldB % map.sizeX
+        val by = fieldB / map.sizeX
+        val distx = Math.abs(ax - bx)
+        val disty = Math.abs(ay - by)
+        return distx + disty
+    }
+
     fun getReachableFields (unit: Unit) : List<Int> {
         val movementPoints = if (unit.food != 0) Unit.Data[unit.type]!!.movementPoints else 1
         val movementCosts = Unit.Data[unit.type]!!.movementCosts
@@ -216,7 +429,7 @@ data class Game(
         val reachableFields = mutableMapOf<Int, Int>()
         reachableFields[unit.field] = movementPoints
         var allDone = 0
-        if (unit.didMove)
+        if (unit.didMove || unit.faction != myFaction)
             allDone = 2
         while (allDone < 2) {
             var changed = false
@@ -294,6 +507,36 @@ data class Game(
         }
         reachableFieldList.remove(unit.field)
         return reachableFieldList
+    }
+    
+    fun getAttackableUnitsFields (unit: Unit) : List<Int> {
+        val minAttackDistance = Unit.Data[unit.type]!!.minAttackDistance
+        val maxAttackDistance = Unit.Data[unit.type]!!.maxAttackDistance
+        val attackableFields = mutableListOf<Int>()
+        if (unit.didFight || unit.faction != myFaction)
+            return emptyList()
+        // 1. get all fields with minAttackDistance <= distance to field <= maxAttackDistance
+        val fieldsToCheck = mutableListOf<Point>()
+        if (minAttackDistance == 1) fieldsToCheck.addAll(FieldDistances.distance_1)
+        if (maxAttackDistance >= 2) fieldsToCheck.addAll(FieldDistances.distance_2)
+        if (maxAttackDistance >= 3) fieldsToCheck.addAll(FieldDistances.distance_3)
+        if (maxAttackDistance >= 4) fieldsToCheck.addAll(FieldDistances.distance_4)
+        val unitX = unit.field % map.sizeX
+        val unitY = unit.field / map.sizeX
+        val minX = - unitX
+        val maxX = map.sizeX - unitX - 1
+        val minY = - unitY
+        val maxY = map.sizeY - unitY - 1
+        fieldsToCheck.filter {
+            it.x in minX..maxX && it.y in minY..maxY
+        }.forEach { // 2. add all fields with enemy units on them to the final list
+            val field = unit.field + it.x + (it.y * map.sizeX)
+            getUnitOnField(field)?.let { u ->
+                if (u.faction != unit.faction)
+                    attackableFields.add(field)
+            }
+        }
+        return attackableFields
     }
 
     fun hasSupportingBuildingNearby (unit: Unit) : Boolean {

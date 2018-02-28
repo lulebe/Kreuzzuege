@@ -5,13 +5,9 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.util.Log
-import android.util.TypedValue
 import de.lulebe.kreuzzuege.data.Faction
 import de.lulebe.kreuzzuege.data.Field
 import de.lulebe.kreuzzuege.data.Map
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
 import java.io.File
 
 
@@ -34,6 +30,7 @@ class GameBitmapStorage (private val context: Context) {
 
 
     fun init(fieldSize: Float, icSize: Float) {
+        initialized = false
         crusadersBuildings.clear()
         saracenBuildings.clear()
         icons.clear()
@@ -41,7 +38,6 @@ class GameBitmapStorage (private val context: Context) {
         saracenUnits.clear()
         mFieldSize = fieldSize
         mIcSize = icSize
-        initialized = false
         loadBuildings()
         loadIcons()
         loadUnits()
@@ -51,7 +47,7 @@ class GameBitmapStorage (private val context: Context) {
     fun createMap (map: Map) : Bitmap {
         while (!initialized) {}
         val bmpBackground = loadImgToWidth(
-                "mapBackgrounds" + File.separator + "map" + map.id.toString() + ".png",
+                "mapBackgrounds" + File.separator + "map" + map.id.toString() + ".jpg",
                 (mFieldSize * map.sizeX).toInt()
         ).copy(Bitmap.Config.ARGB_8888, true)
         val bgCanvas = Canvas(bmpBackground!!)

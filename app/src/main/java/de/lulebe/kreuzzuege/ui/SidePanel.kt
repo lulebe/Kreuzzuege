@@ -6,9 +6,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import de.lulebe.kreuzzuege.R
-import de.lulebe.kreuzzuege.data.Field
-import de.lulebe.kreuzzuege.data.Game
-import de.lulebe.kreuzzuege.data.Player
+import de.lulebe.kreuzzuege.data.*
 import de.lulebe.kreuzzuege.data.Unit
 
 
@@ -53,8 +51,8 @@ class SidePanel (private val layout: ViewGroup, private val onTurnEndListener: (
             val x = fieldPos % g.map.sizeX
             val y = fieldPos / g.map.sizeY
             val field = g.map.fields[fieldPos]
-            val currentPlayer = if (g.turn % 2 == 0) g.playerSaracen else g.playerCrusaders
-            val currentEnemy = if (g.turn % 2 == 0) g.playerCrusaders else g.playerSaracen
+            val currentPlayer = if (g.myFaction == Faction.CRUSADERS) g.playerCrusaders else g.playerSaracen
+            val currentEnemy = if (g.myFaction == Faction.CRUSADERS) g.playerSaracen else g.playerCrusaders
             val tv = layout.findViewById<TextView>(R.id.tv_selectedField)
             tv.text = "Selected Field: " + (x+1) + "|" + (y+1) + ": " + field.terrain
             val building = Field.Building.Data[field.building]

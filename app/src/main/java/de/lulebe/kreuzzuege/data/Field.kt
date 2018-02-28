@@ -18,9 +18,25 @@ data class Field (
             const val ROAD = 6
             const val RIVER = 7
             const val SWAMP = 8
+            val HBonuses = mapOf(
+                    Pair(SEA, 0),
+                    Pair(SOIL, 1),
+                    Pair(HEDGES, 2),
+                    Pair(FOREST, 2),
+                    Pair(HILLS, 3),
+                    Pair(ROAD, 0),
+                    Pair(RIVER, 0),
+                    Pair(SWAMP, 0)
+            )
         }
     }
-    class Building(val unitsToRecruit: List<Int>, val unitsToSupport: List<Int>, val taxes: Int, val name: Int) {
+    class Building(
+            val unitsToRecruit: List<Int>,
+            val unitsToSupport: List<Int>,
+            val taxes: Int,
+            val battleBonus: Int,
+            val name: Int
+    ) {
         companion object {
             const val VILLAGE = 1
             const val CITY = 2
@@ -31,7 +47,7 @@ data class Field (
             const val HARBOUR = 7
             const val AIRPORT = 8
             val Data = mapOf(
-                    Pair(VILLAGE, Building(emptyList(), emptyList(), 1, R.string.building_village)),
+                    Pair(VILLAGE, Building(emptyList(), emptyList(), 1, 1, R.string.building_village)),
                     Pair(CITY, Building(emptyList(), listOf(
                             Unit.Type.GUARD,
                             Unit.Type.SPEAR,
@@ -44,7 +60,7 @@ data class Field (
                             Unit.Type.BALLISTA,
                             Unit.Type.TREBUCHET,
                             Unit.Type.TOWER
-                    ), 4, R.string.building_city)),
+                    ), 4, 3, R.string.building_city)),
                     Pair(HQ, Building(emptyList(), listOf(
                             Unit.Type.GUARD,
                             Unit.Type.SPEAR,
@@ -58,34 +74,34 @@ data class Field (
                             Unit.Type.TREBUCHET,
                             Unit.Type.TOWER,
                             Unit.Type.AIR
-                    ), 2, R.string.building_village)),
+                    ), 2, 1, R.string.building_village)),
                     Pair(BARRACKS, Building(listOf(
                             Unit.Type.GUARD,
                             Unit.Type.SPEAR,
                             Unit.Type.SWORD,
                             Unit.Type.ARCHER
-                    ), emptyList(), 0, R.string.building_barracks)),
+                    ), emptyList(), 0, 2, R.string.building_barracks)),
                     Pair(STABLE, Building(listOf(
                             Unit.Type.LIGHT_KAV,
                             Unit.Type.ARCHER_KAV,
                             Unit.Type.HEAVY_KAV
-                    ), emptyList(), 0, R.string.building_stable)),
+                    ), emptyList(), 0, 2, R.string.building_stable)),
                     Pair(FACTORY, Building(listOf(
                             Unit.Type.CATAPULT,
                             Unit.Type.BALLISTA,
                             Unit.Type.TREBUCHET,
                             Unit.Type.TOWER
-                    ), emptyList(), 0, R.string.building_factory)),
+                    ), emptyList(), 0, 2, R.string.building_factory)),
                     Pair(HARBOUR, Building(listOf(
                             Unit.Type.SHIP
                     ), listOf(
                             Unit.Type.SHIP
-                    ), 0, R.string.building_harbour)),
+                    ), 0, 2, R.string.building_harbour)),
                     Pair(AIRPORT, Building(listOf(
                             Unit.Type.AIR
                     ), listOf(
                             Unit.Type.AIR
-                    ), 0, R.string.building_airport))
+                    ), 0, 2, R.string.building_airport))
             )
         }
     }

@@ -6,6 +6,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
+import android.util.Log
 import android.util.TypedValue
 import android.view.GestureDetector
 import android.view.HapticFeedbackConstants
@@ -35,13 +36,13 @@ class MapView : View {
 
     private val mBmpPaint = Paint()
     private val mReachableFieldPaint = Paint()
+    private val mAttackableFieldPaint = Paint()
     private val mSelectedPaint = Paint()
     private val mUnitHealthBGPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val mUnitHealthPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var mBmpBackground: Bitmap? = null
     private var mSelected: Pair<Int, Int>? = null
     private val mBitmaps = GameBitmapStorage(context)
-    private var mBitmapsReady = false
     private val mUnitHealthBGCornerRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2F, context.resources.displayMetrics)
     private val mSelectionCornerRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4F, context.resources.displayMetrics)
     private var mFieldSize = 0F
@@ -114,6 +115,9 @@ class MapView : View {
         mReachableFieldPaint.color = Color.parseColor("#66ff66")
         mReachableFieldPaint.style = Paint.Style.FILL
         mReachableFieldPaint.alpha = 80
+        mAttackableFieldPaint.color = Color.parseColor("#ff6666")
+        mAttackableFieldPaint.style = Paint.Style.FILL
+        mAttackableFieldPaint.alpha = 80
         mSelectedPaint.color = Color.WHITE
         mSelectedPaint.style = Paint.Style.STROKE
         mSelectedPaint.strokeWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2F, context.resources.displayMetrics)
@@ -134,12 +138,12 @@ class MapView : View {
     fun renderGame (game: Game) {
         mGame = game
         game.addListener(mGameChangeListener)
-        if (mBitmapsReady)
+        if (mBitmaps.initialized)
             invalidate()
     }
 
     private fun initBitmaps (width: Int, height: Int) {
-        mBitmapsReady = false
+        mBitmaps.initialized = false
         mMap?.let { map ->
             val minFieldSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50F, context.resources.displayMetrics)
             mFieldSize = Math.max(Math.min(width.toFloat() / map.sizeX, height.toFloat() / map.sizeY), minFieldSize)
@@ -154,7 +158,6 @@ class MapView : View {
                 mBitmaps.init(mFieldSize, mIcSize)
                 mBmpBackground = mBitmaps.createMap(map)
                 uiThread {
-                    mBitmapsReady = true
                     invalidate()
                 }
             }
@@ -183,6 +186,17 @@ class MapView : View {
                         (x+1) * mFieldSize,
                         (y+1) * mFieldSize,
                         mReachableFieldPaint
+                )
+            }
+            mGame?.selectedUnitFightOptions!!.forEach {
+                val x = it % mGame!!.map.sizeX
+                val y = it / mGame!!.map.sizeX
+                canvas.drawRect(
+                        x * mFieldSize,
+                        y * mFieldSize,
+                        (x+1) * mFieldSize,
+                        (y+1) * mFieldSize,
+                        mAttackableFieldPaint
                 )
             }
             mSelected?.let {
@@ -230,7 +244,7 @@ class MapView : View {
     }
 
     private fun drawUnits (canvas: Canvas, game: Game) {
-        if (!mBitmapsReady) return
+        if (!mBitmaps.initialized) return
         game.playerCrusaders.units.forEach { unit ->
             drawUnit(canvas, unit, game)
         }

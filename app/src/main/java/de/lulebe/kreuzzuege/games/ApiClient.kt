@@ -97,9 +97,10 @@ class ApiClient(private val context: Context) {
                 .build()
         val response = mHttpClient.newCall(request).execute()
         Log.d("GAMES", response.code().toString())
-        Log.d("GAMES", response.body()!!.string())
+        val body = response.body()!!.string()
+        Log.d("GAMES", body)
         if (response.isSuccessful) {
-            return Parser().parse(StringBuilder(response.body()!!.string())) as JsonArray<JsonObject>
+            return Parser().parse(StringBuilder(body)) as JsonArray<JsonObject>
         } else if (response.code() == 401 && mUsername != null && !retried && signIn(mUsername!!, mPassword!!))
             return getGames(true)
         if (response.code() == 401)
@@ -108,20 +109,27 @@ class ApiClient(private val context: Context) {
     }
 
     fun uploadGame (data: JsonObject, retried: Boolean = false) : Boolean {
+        data["players"] = data.array<JsonObject>("players")!!.map { it.int("id")!! }
+        val json = data.toJsonString()
+        Log.d("UPLOAD", json)
         val request = if (!data.containsKey("id")) { //is first turn
-            val body = RequestBody.create(JSON, data.toJsonString())
+            val body = RequestBody.create(JSON, json)
             Request.Builder()
                     .url(BASE_URL + "/game")
+                    .addHeader("authorization", mJwt)
                     .post(body)
                     .build()
         } else {
             val body = RequestBody.create(JSON, data.toJsonString())
             Request.Builder()
                     .url(BASE_URL + "/game/" + data["id"])
+                    .addHeader("authorization", mJwt)
                     .put(body)
                     .build()
         }
         val response = mHttpClient.newCall(request).execute()
+        Log.d("UPLOAD", response.code().toString())
+        response.body()?.let { Log.d("UPLOAD", it.string()) }
         if (response.code() == 401 && mUsername != null && !retried && signIn(mUsername!!, mPassword!!))
             return uploadGame(data, true)
         return response.isSuccessful

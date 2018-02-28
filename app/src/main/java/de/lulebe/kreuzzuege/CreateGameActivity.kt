@@ -1,10 +1,12 @@
 package de.lulebe.kreuzzuege
 
+import android.content.Context
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
+import android.view.View
 import android.widget.ProgressBar
 import android.widget.Toast
 import com.beust.klaxon.JsonArray
@@ -76,6 +78,7 @@ class CreateGameActivity : AppCompatActivity() {
     private fun selectedUser(user: JsonObject) {
         mSelectedUserId = user.int("id")!!
         mSelectedUsername = user.string("name")!!
+        l_playersearch.visibility = View.GONE
         rv_users.adapter = mMapsAdapter
         Toast.makeText(this, "Select a map to play against $mSelectedUsername!", Toast.LENGTH_SHORT).show()
     }
@@ -83,23 +86,37 @@ class CreateGameActivity : AppCompatActivity() {
     private fun selectedMap(map: Map) {
         val spinnerDialog = showGameCreationSpinnerDialog()
         doAsync {
+            val sp = getSharedPreferences("login", Context.MODE_PRIVATE)
             val game = Game(
                     Game.Type.SINGLEPLAYER,
                     Maps.getFullMap(map.id, this@CreateGameActivity),
                     Player(Faction.CRUSADERS, 20, mutableListOf(), mutableListOf()),
                     Player(Faction.SARACEN, 20, mutableListOf(), mutableListOf()),
+                    0,
                     1,
-                    false,
+                    null,
+                    mutableListOf(),
                     Faction.CRUSADERS,
+                    sp.getInt("userId", 0),
+                    mSelectedUserId,
                     mSelectedUsername
             )
+
             val json = JsonObject(
                     mapOf(
                             Pair("data", game.toJSON()),
-                            Pair("players", JsonArray(listOf(JsonObject(mapOf(
-                                    Pair("id", mSelectedUserId),
-                                    Pair("name", mSelectedUsername)
-                            )))))
+                            Pair("players", JsonArray(listOf(
+                                    JsonObject(mapOf(
+                                            Pair("id", sp.getInt("userId", 0)),
+                                            Pair("name", sp.getString("username", "")),
+                                            Pair("order", 0)
+                                    )),
+                                    JsonObject(mapOf(
+                                            Pair("id", mSelectedUserId),
+                                            Pair("name", mSelectedUsername),
+                                            Pair("order", 1)
+                                    ))
+                            )))
                     )
             ).toJsonString()
             uiThread {

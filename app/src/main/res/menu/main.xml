@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/menuitem_settings"
-        android:title="Settings"
+        android:id="@+id/menuitem_signout"
+        android:title="Sign out"
         app:showAsAction="never"/>
 </menu>
