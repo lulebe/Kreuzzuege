@@ -23,11 +23,6 @@
         android:background="#decfac"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tv_selectedField"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -74,21 +69,42 @@
                     android:text="recruitable Units:"
                     android:visibility="gone"/>
 
-                <TextView
-                    android:id="@+id/l_recruitable_units_empty"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                    android:text="No units can be recruited here."
-                    android:visibility="gone"/>
-
                 <LinearLayout
                     android:id="@+id/l_recruitable_units"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:visibility="gone"/>
+
+                <LinearLayout
+                    android:id="@+id/l_unitinfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/tv_currentunit_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/l_buildinginfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/tv_currentbuilding_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
+
+                </LinearLayout>
 
                 <Button
                     android:id="@+id/btn_endturn"

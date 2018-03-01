@@ -10,6 +10,7 @@ import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
+import org.jetbrains.anko.doAsync
 import java.net.URLEncoder
 
 
@@ -36,6 +37,14 @@ class ApiClient(private val context: Context) {
         spEditor.remove("username")
         spEditor.remove("password")
         spEditor.commit()
+        deleteFCMToken()
+    }
+
+    fun signInSilent() : Boolean {
+        val sp = context.getSharedPreferences("login", Context.MODE_PRIVATE)
+        if (sp.contains("username") && sp.contains("password"))
+            return signIn(sp.getString("username", ""), sp.getString("password", ""))
+        return false
     }
 
     fun signIn (username: String, password: String) : Boolean {
@@ -101,7 +110,7 @@ class ApiClient(private val context: Context) {
         Log.d("GAMES", body)
         if (response.isSuccessful) {
             return Parser().parse(StringBuilder(body)) as JsonArray<JsonObject>
-        } else if (response.code() == 401 && mUsername != null && !retried && signIn(mUsername!!, mPassword!!))
+        } else if (response.code() == 401 && mUsername != null && !retried && signInSilent())
             return getGames(true)
         if (response.code() == 401)
             throw AuthException()
@@ -130,9 +139,51 @@ class ApiClient(private val context: Context) {
         val response = mHttpClient.newCall(request).execute()
         Log.d("UPLOAD", response.code().toString())
         response.body()?.let { Log.d("UPLOAD", it.string()) }
-        if (response.code() == 401 && mUsername != null && !retried && signIn(mUsername!!, mPassword!!))
+        if (response.code() == 401 && mUsername != null && !retried && signInSilent())
             return uploadGame(data, true)
         return response.isSuccessful
+    }
+
+    fun sendFCMToken (token: String) {
+        if (!signInSilent()) return
+        val sp = context.getSharedPreferences("fcm", Context.MODE_PRIVATE)
+        val oldToken = sp.getString("token", null)
+        val json = JsonObject(mapOf(
+                Pair("newToken", token)
+        ))
+        var oldIsNew = false
+        oldToken?.let {
+            json["oldToken"] = it
+            oldIsNew = it == token
+        }
+        if (oldIsNew) return
+        val body = RequestBody.create(JSON, json.toJsonString())
+        val request = Request.Builder()
+                .url(BASE_URL + "/user/device/fcm")
+                .addHeader("authorization", mJwt)
+                .post(body)
+                .build()
+        val response = mHttpClient.newCall(request).execute()
+        if (response.isSuccessful)
+            sp.edit().putString("token", token).apply()
+        Log.d("TOKEN_UPDATE", response.code().toString())
+    }
+
+    fun deleteFCMToken() {
+        val sp = context.getSharedPreferences("fcm", Context.MODE_PRIVATE)
+        if (!sp.contains("token") || !signInSilent()) return
+        val token = sp.getString("token", "")
+        val json = JsonObject(mapOf(
+                Pair("oldToken", token)
+        ))
+        val body = RequestBody.create(JSON, json.toJsonString())
+        val request = Request.Builder()
+                .url(BASE_URL + "/user/device/fcm")
+                .addHeader("authorization", mJwt)
+                .post(body)
+                .build()
+        mHttpClient.newCall(request).execute()
+        sp.edit().clear().commit()
     }
 
     class AuthException: Exception()

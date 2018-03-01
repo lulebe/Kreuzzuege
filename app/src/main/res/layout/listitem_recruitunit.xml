@@ -5,12 +5,30 @@
     android:layout_height="48dp"
     android:background="?attr/selectableItemBackground">
 
+    <ImageView
+        android:id="@+id/iv_unit"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="4dp"
+        android:scaleType="centerInside"/>
+
     <TextView
         android:id="@+id/tv_name"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_marginStart="48dp"
+        android:layout_marginStart="52dp"
         android:gravity="center_vertical" />
+
+    <ImageView
+        android:id="@+id/btn_info"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="right"
+        android:padding="12dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:src="@drawable/ic_information_outline"
+        android:foreground="?attr/selectableItemBackgroundBorderless"/>
 
     <View
         android:layout_width="match_parent"

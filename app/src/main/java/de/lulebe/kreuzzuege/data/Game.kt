@@ -95,6 +95,7 @@ data class Game(
         playerSaracen.units.forEach {
             unitsById[it.id] = it
         }
+        turnActions.clear()
     }
 
     fun addListener (listener: () -> kotlin.Unit) {

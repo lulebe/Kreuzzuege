@@ -12,12 +12,7 @@ import de.lulebe.kreuzzuege.R
 import de.lulebe.kreuzzuege.data.Maps
 
 
-class GamesAdapter : RecyclerView.Adapter<GamesAdapter.ViewHolder>() {
-
-    var userId = 0
-    var games = emptyList<JsonObject>()
-
-    var clickListener: ((JsonObject) -> Unit)? = null
+class GamesAdapter(val games: List<JsonObject>, val userId: Int, val clickListener: ((JsonObject) -> Unit)) : RecyclerView.Adapter<GamesAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.listitem_game, parent, false))

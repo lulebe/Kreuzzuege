@@ -11,8 +11,8 @@ android {
         applicationId "de.lulebe.kreuzzuege"
         minSdkVersion 21
         targetSdkVersion 26
-        versionCode 1
-        versionName "0.1"
+        versionCode 11
+        versionName "0.1.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -37,6 +37,7 @@ dependencies {
     implementation 'org.jetbrains.anko:anko-commons:0.10.4'
     implementation 'com.squareup.okhttp3:okhttp:3.9.1'
     implementation 'com.beust:klaxon:2.1.6'
+    implementation 'com.squareup.picasso:picasso:2.5.2'
 }
 
 
